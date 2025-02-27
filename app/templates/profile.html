@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .profile-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .profile-header h2 {
+        font-size: 24px;
+        color: #ffcc00;
+    }
+    .profile-details {
+        margin-bottom: 20px;
+    }
+    .profile-details p {
+        font-size: 16px;
+        margin: 10px 0;
+    }
+    .profile-details strong {
+        color: #ffcc00;
+    }
+    .profile-picture {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .profile-picture img {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid #ffcc00;
+    }
+    .edit-profile-form {
+        display: none;
+        margin-bottom: 20px;
+    }
+    .edit-profile-form input,
+    .edit-profile-form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        outline: none;
+    }
+    .edit-profile-form input:focus,
+    .edit-profile-form textarea:focus {
+        border-color: #ffcc00;
+        background: rgba(255, 255, 255, 0.3);
+    }
+    .btn-edit {
+        background: linear-gradient(45deg, #28a745, #60c37b);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .btn-edit:hover {
+        background: linear-gradient(45deg, #218838, #4fa463);
+        transform: translateY(-2px);
+    }
+    .btn-delete {
+        background: linear-gradient(45deg, #dc3545, #ff6b6b);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .btn-delete:hover {
+        background: linear-gradient(45deg, #c82333, #e04747);
+        transform: translateY(-2px);
+    }
+    .graph-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .graph-container img {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <h2>Profile</h2>
+    </div>
+
+    <!-- Profile Picture -->
+    <div class="profile-picture">
+        <img src="{{ url_for('static', filename=current_user.profile_picture) if current_user.profile_picture else url_for('static', filename='images/default_profile.png') }}" alt="Profile Picture">
+    </div>
+
+    <!-- Profile Details -->
+    <div class="profile-details">
+        <p><strong>Username:</strong> {{ current_user.username }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p><strong>Contact Number:</strong> {{ current_user.contact_number }}</p>
+    </div>
+
+    <!-- Edit Profile Button -->
+    <button class="btn-edit" id="editProfileButton">Edit Profile</button>
+
+    <!-- Edit Profile Form -->
+    <form method="POST" action="{{ url_for('main.profile') }}" enctype="multipart/form-data" class="edit-profile-form" id="editProfileForm">
+        <input type="text" name="username" value="{{ current_user.username }}" placeholder="Username" required>
+        <input type="email" name="email" value="{{ current_user.email }}" placeholder="Email" required>
+        <input type="text" name="contact_number" value="{{ current_user.contact_number }}" placeholder="Contact Number" required>
+        <input type="file" name="profile_picture" accept="image/*">
+        <input type="password" name="current_password" placeholder="Current Password" required>
+        <button type="submit" class="btn-edit">Save Changes</button>
+    </form>
+
+    <!-- Change Password Button -->
+    <button class="btn-edit" id="changePasswordButton">Change Password</button>
+
+    <!-- Change Password Form -->
+    <form method="POST" action="{{ url_for('main.change_password') }}" class="edit-profile-form" id="changePasswordForm">
+        <input type="password" name="current_password" placeholder="Current Password" required>
+        <input type="password" name="new_password" placeholder="New Password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+        <button type="submit" class="btn-edit">Change Password</button>
+    </form>
+
+    <!-- Expense Analytics Graph -->
+    <div class="graph-container">
+        <h3>Expense Analytics for This Month</h3>
+        <img src="data:image/png;base64,{{ graph_url }}" alt="Expense Analytics Graph">
+    </div>
+
+    <!-- Delete Profile Button -->
+    <button class="btn-delete" id="deleteProfileButton">Delete Profile</button>
+
+    <!-- Delete Profile Confirmation -->
+    <div id="deleteProfileConfirmation" style="display: none;">
+        <p>⚠️ Warning: Deleting your profile will permanently remove all your data. This action cannot be undone.</p>
+        <form method="POST" action="{{ url_for('main.delete_profile') }}">
+            <input type="password" name="current_password" placeholder="Current Password" required>
+            <button type="submit" class="btn-delete">Confirm Delete</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Toggle Edit Profile Form
+    const editProfileButton = document.getElementById('editProfileButton');
+    const editProfileForm = document.getElementById('editProfileForm');
+    const changePasswordButton = document.getElementById('changePasswordButton');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const deleteProfileButton = document.getElementById('deleteProfileButton');
+    const deleteProfileConfirmation = document.getElementById('deleteProfileConfirmation');
+
+    editProfileButton.addEventListener('click', () => {
+        if (editProfileForm.style.display === 'none' || editProfileForm.style.display === '') {
+            editProfileForm.style.display = 'block';
+            changePasswordForm.style.display = 'none';
+        } else {
+            editProfileForm.style.display = 'none';
+        }
+    });
+
+    // Toggle Change Password Form
+    changePasswordButton.addEventListener('click', () => {
+        if (changePasswordForm.style.display === 'none' || changePasswordForm.style.display === '') {
+            changePasswordForm.style.display = 'block';
+            editProfileForm.style.display = 'none';
+        } else {
+            changePasswordForm.style.display = 'none';
+        }
+    });
+
+    // Toggle Delete Profile Confirmation
+    deleteProfileButton.addEventListener('click', () => {
+        if (deleteProfileConfirmation.style.display === 'none' || deleteProfileConfirmation.style.display === '') {
+            deleteProfileConfirmation.style.display = 'block';
+        } else {
+            deleteProfileConfirmation.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

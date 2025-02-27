@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to right, #2c3e50, #4ca1af);
+        color: white;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    h2 {
+        text-align: center;
+        color: white;
+        margin-top: 2px;
+    }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-container label {
+        color: white;
+        font-weight: bold;
+    }
+
+    .form-container input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .form-container input::placeholder {
+        color: #ddd;
+    }
+
+    .form-container button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 15px;
+        background: #ff9800;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .form-container button:hover {
+        background: #e68900;
+    }
+
+    .category-container {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        color: white;
+    }
+
+    .exceeded {
+        background-color: rgba(255, 0, 0, 0.3);
+        border-left: 5px solid red;
+    }
+
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .menu {
+        cursor: pointer;
+        font-size: 20px;
+        padding: 5px;
+    }
+
+    .menu-options {
+        display: none;
+        position: absolute;
+        top: 30px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        width: 120px;
+    }
+
+    .menu-options a {
+        display: block;
+        padding: 10px;
+        text-decoration: none;
+        color: black;
+    }
+
+    .menu-options a:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-expense {
+        margin-top: 10px;
+        padding: 10px;
+        text-align: center;
+        background: #28a745;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .edit-expense:hover {
+        background: #218838;
+    }
+
+    .alert-box {
+        background-color: #ff4444;
+        color: white;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+
+<div class="container">
+    <h2>Add Category</h2>
+
+    <div id="alert-box" class="alert-box"></div>
+
+    <div class="form-container">
+        <form method="POST">
+            <label for="name">Category Name:</label>
+            <input type="text" id="name" name="name" required placeholder="Enter category name">
+
+            <label for="estimated_expense">Estimated Expense:</label>
+            <input type="number" id="estimated_expense" name="estimated_expense" step="0.01" required placeholder="Enter estimated expense">
+
+            <button type="submit">Add Category</button>
+        </form>
+    </div>
+
+    {% for category in categories %}
+        <div class="category-container {% if category.expended_amount > category.estimated_expense %}exceeded{% endif %}">
+            <div class="category-header">
+                <span>{{ category.name }}</span>
+                <span class="menu" onclick="toggleMenu('menu-{{ category.id }}')">⋮</span>
+                <div class="menu-options" id="menu-{{ category.id }}">
+                    <a href="{{ url_for('main.edit_category', category_id=category.id) }}">Edit</a>
+                    <a href="{{ url_for('main.delete_category', category_id=category.id) }}" onclick="return confirm('Are you sure?')">Delete</a>
+                </div>
+            </div>
+            <p>Estimated: ₹{{ category.estimated_expense }}</p>
+            <p>Spent: ₹{{ category.expended_amount }}</p>
+            <a href="{{ url_for('main.edit_expenses', category_id=category.id) }}" class="edit-expense">Edit Expenses</a>
+        </div>
+
+        {% if category.expended_amount > category.estimated_expense %}
+            <script>
+                document.getElementById('alert-box').style.display = "block";
+                document.getElementById('alert-box').innerHTML += "⚠ Warning: '{{ category.name }}' has exceeded the estimated expense.<br>";
+            </script>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<script>
+    function toggleMenu(menuId) {
+        var menu = document.getElementById(menuId);
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    document.addEventListener("click", function(event) {
+        document.querySelectorAll(".menu-options").forEach(menu => {
+            if (!menu.contains(event.target) && !event.target.classList.contains("menu")) {
+                menu.style.display = "none";
+            }
+        });
+    });
+
+    document.querySelectorAll(".menu-options").forEach(menu => {
+        menu.addEventListener("mouseleave", function() {
+            menu.style.display = "none";
+        });
+    });
+</script>
+
+{% endblock %}

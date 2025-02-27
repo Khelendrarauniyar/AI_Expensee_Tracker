@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .help-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .help-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .help-header h2 {
+        font-size: 24px;
+        color: #ffcc00;
+    }
+    .help-content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    .help-content h3 {
+        margin-top: 20px;
+        font-size: 20px;
+        color: #ffcc00;
+    }
+    .help-content p,
+    .help-content ul {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="help-container">
+    <div class="help-header">
+        <h2>Help & Support</h2>
+    </div>
+    <div class="help-content">
+        <h3>Contact Information</h3>
+        <p>If you have any questions or need assistance, please contact us:</p>
+        <p>Email: support@expensetracker.com</p>
+        <p>Phone: +1 (123) 456-7890</p>
+
+        <h3>How to Use This Web App</h3>
+        <p>Follow these steps to get started with the Expense Tracker:</p>
+        <ol>
+            <li><strong>Sign Up:</strong> Create a new account by providing your username, email, and password.</li>
+            <li><strong>Log In:</strong> Log in to your account using your credentials.</li>
+            <li><strong>Add Categories:</strong> Navigate to the "Add Category" page to create expense categories (e.g., Food, Transportation, Entertainment).</li>
+            <li><strong>Add Expenses:</strong> Go to the "Add Expense" page to record your daily expenses. Select the appropriate category, enter the amount, date, and any notes.</li>
+            <li><strong>View Analytics:</strong> Access the "View Analytics" page to see detailed reports and graphs of your spending habits.</li>
+            <li><strong>Edit Profile:</strong> Update your profile information and upload a profile picture on the "Profile" page.</li>
+        </ol>
+        <p>We hope you find this application useful for managing your finances. If you encounter any issues or have suggestions for improvement, please don't hesitate to reach out to us.</p>
+    </div>
+</div>
+{% endblock %}

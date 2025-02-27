@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .container {
+        text-align: center;
+    }
+
+    .summary-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 30px;
+    }
+
+    .summary-box {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 20px 40px;
+        border-radius: 10px;
+        color: #333;
+        font-size: 1.3em;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .quote-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: white;
+        font-style: italic;
+        font-size: 1.2em;
+        position: relative;
+    }
+
+    .quote-container::before {
+        content: '“';
+        position: absolute;
+        top: -20px;
+        left: 10px;
+        font-size: 4em;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .quote-container::after {
+        content: '”';
+        position: absolute;
+        bottom: -40px;
+        right: 10px;
+        font-size: 4em;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .categories-title {
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .suggestions-logo {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        background: url('/static/images/suggestions-icon.png') no-repeat center center;
+        background-size: contain;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .suggestions-logo:hover {
+        transform: scale(1.1);
+    }
+
+    .suggestions-logo .red-dot {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background: red;
+        border-radius: 50%;
+        display: none; /* Hidden by default */
+    }
+    .suggestions-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        padding: 20px;
+        overflow: hidden;
+    }
+
+    .suggestions-modal.active {
+        display: block;
+    }
+
+    .suggestions-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .suggestions-modal-header h3 {
+        margin: 0;
+        font-size: 1.5em;
+        color: #333;
+    }
+    
+    .suggestions-modal-header .close-button {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #333;
+    }
+    
+    .suggestions-modal-content {
+        font-size: 1.1em;
+        color: #555;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+    
+    .suggestions-text {
+        white-space: pre-wrap; /* Preserve line breaks */
+        line-height: 1.6;
+    }
+    
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    
+    .overlay.active {
+        display: block;
+    }
+
+    .categories-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 0 20px;
+    }
+
+    .category-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .category-card h3 {
+        margin: 0 0 10px;
+        font-size: 1.5em;
+    }
+
+    .category-card p {
+        margin: 5px 0;
+        font-size: 1em;
+        font-weight: bold;
+    }
+
+    .category-card:nth-child(odd) {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        color: white;
+    }
+
+    .category-card:nth-child(even) {
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        color: white;
+    }
+
+    .category-card.exceeded {
+        background: #ff4c4c;
+        color: white;
+    }
+
+    .alert-box {
+        background-color: #ff4444;
+        color: white;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .chat-logo {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: url('/static/images/chat_logo.png') no-repeat center center;
+        background-size: contain;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container">
+    {% if total_expended_amount > total_expected_amount %}
+    <div class="alert-box">
+        ⚠️ Total expended amount exceeds the total expected amount!
+    </div>
+    {% endif %}
+
+    <!-- Positive Thought Quote -->
+    <div class="quote-container">
+        <p>"{{ quote }}"</p>
+    </div>
+
+    <div class="summary-container">
+        <div class="summary-box">
+            <strong>Total Expected Amount:</strong> ₹{{ total_expected_amount }}
+        </div>
+        <div class="summary-box">
+            <strong>Total Expended Amount:</strong> ₹{{ total_expended_amount }}
+        </div>
+    </div>
+
+    <!-- Category Wise Expenses with Suggestions Logo -->
+    <div class="categories-title">
+        Category Wise Expenses
+        <div class="suggestions-logo" onclick="openSuggestions()">
+            <div class="red-dot" id="redDot"></div>
+        </div>
+    </div>
+
+    <div class="categories-container">
+        {% for category in categories %}
+            <div class="category-card {% if category.expended_amount > category.estimated_expense %}exceeded{% endif %}" onclick="window.location.href='{{ url_for('main.expense_details', category_id=category.id) }}'">
+                <h3>{{ category.name }}</h3>
+                <p>Expected: ₹{{ category.estimated_expense }}</p>
+                <p>Expended: ₹{{ category.expended_amount }}</p>
+            </div>
+            {% if category.expended_amount > category.estimated_expense %}
+            <div class="alert-box">
+                ⚠️ Category '{{ category.name }}' has exceeded the estimated expense!
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Chat Logo -->
+<div class="chat-logo" onclick="openChat()"></div>
+
+<!-- Suggestions Modal -->
+<div class="overlay" id="overlay"></div>
+<div class="suggestions-modal" id="suggestionsModal">
+    <div class="suggestions-modal-header">
+        <h3>Finance Suggestions</h3>
+        <button class="close-button" onclick="closeSuggestions()">×</button>
+    </div>
+    <div class="suggestions-modal-content">
+        <div class="suggestions-text" id="suggestionsText">
+            {{ suggestions }}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to open suggestions modal
+function openSuggestions() {
+    // Format the suggestions text
+    const suggestionsText = document.getElementById('suggestionsText');
+    let text = suggestionsText.textContent;
+
+    // Remove unwanted symbols (e.g., **)
+    text = text.replace(/\*\*/g, '');
+
+    // Add line breaks where needed (e.g., after periods or numbers)
+    text = text.replace(/(\d+\.)/g, '$1\n'); // Add line break after numbers like "1."
+    text = text.replace(/(\.\s)/g, '.\n');   // Add line break after periods
+
+    // Update the suggestions text
+    suggestionsText.textContent = text;
+
+    // Show the modal
+    document.getElementById('suggestionsModal').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+
+    // Hide the red dot indicator after opening suggestions
+    document.getElementById('redDot').style.display = 'none';
+}
+
+// Function to close suggestions modal
+function closeSuggestions() {
+    document.getElementById('suggestionsModal').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+}
+
+// Close modal when clicking outside
+document.getElementById('overlay').addEventListener('click', closeSuggestions);
+
+    // Function to open chat
+    function openChat() {
+        alert('Chat with Gemini API');
+    }
+
+    // Show red dot if there are new suggestions
+    const hasNewSuggestions = {{ has_new_suggestions|lower }}; // Passed from backend
+    if (hasNewSuggestions) {
+        document.getElementById('redDot').style.display = 'block';
+    }
+</script>
+
+{% endblock %}

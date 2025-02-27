@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #4facfe, #00f2fe);
+        color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+    .analytics-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .time-range-selector {
+        margin-bottom: 20px;
+    }
+    .time-range-selector select,
+    .time-range-selector input {
+        padding: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        outline: none;
+    }
+    .time-range-selector button {
+        padding: 10px 20px;
+        background: linear-gradient(45deg, #28a745, #60c37b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .time-range-selector button:hover {
+        background: linear-gradient(45deg, #218838, #4fa463);
+        transform: translateY(-2px);
+    }
+    .card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .card h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+        color: #ffcc00;
+    }
+    .graph-container img {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    table th,
+    table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    table th {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<div class="analytics-container">
+    <!-- Time Range Selector -->
+    <div class="time-range-selector card">
+        <h3>Select Time Range</h3>
+        <form method="POST">
+            <select name="time_range">
+                <option value="last_month">Last 1 Month</option>
+                <option value="last_3_months">Last 3 Months</option>
+                <option value="custom">Custom Range</option>
+            </select>
+            <input type="date" name="start_date" value="{{ start_date }}">
+            <input type="date" name="end_date" value="{{ end_date }}">
+            <button type="submit">Apply</button>
+        </form>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="card">
+        <h3>Key Metrics</h3>
+        <p><strong>Total Expenses:</strong> ₹{{ total_expenses }}</p>
+        <p><strong>Average Daily Expenses:</strong> ₹{{ average_daily_expenses|round(2) }}</p>
+        <p><strong>Highest Spending Category:</strong> {{ highest_spending_category }}</p>
+    </div>
+
+    <!-- Line Graph -->
+    <div class="card">
+        <h3>Expense Trends Over Time</h3>
+        <div class="graph-container">
+            <img src="data:image/png;base64,{{ line_graph_url }}" alt="Expense Trends">
+        </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="card">
+        <h3>Expenses by Category</h3>
+        <div class="graph-container">
+            <img src="data:image/png;base64,{{ bar_chart_url }}" alt="Expenses by Category">
+        </div>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="card">
+        <h3>Expenses by Category (Percentage)</h3>
+        <div class="graph-container">
+            <img src="data:image/png;base64,{{ pie_chart_url }}" alt="Expenses by Category (Percentage)">
+        </div>
+    </div>
+
+    <!-- Expense Table -->
+    <div class="card">
+        <h3>Detailed Expense Data</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ expense.category.name }}</td>
+                    <td>{{ expense.title }}</td>
+                    <td>₹{{ expense.amount }}</td>
+                    <td>{{ expense.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .about-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .about-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .about-header h2 {
+        font-size: 24px;
+        color: #ffcc00;
+    }
+    .about-content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="about-container">
+    <div class="about-header">
+        <h2>About This Project</h2>
+    </div>
+    <div class="about-content">
+        <p>Welcome to the Expense Tracker web application! This project is designed to help you manage your personal finances by tracking your expenses and categorizing them. With this application, you can:</p>
+        <ul>
+            <li>Add and manage expense categories</li>
+            <li>Record your daily expenses</li>
+            <li>View detailed analytics and reports</li>
+            <li>Track your spending habits over time</li>
+        </ul>
+        <p>The Expense Tracker is built using Flask, a lightweight web framework for Python. It uses SQLAlchemy for database management and Jinja2 for templating. The front-end is styled with custom CSS to provide a clean and modern user interface.</p>
+        <p>We hope this application helps you gain better control over your finances and make informed decisions about your spending.</p>
+    </div>
+</div>
+{% endblock %}

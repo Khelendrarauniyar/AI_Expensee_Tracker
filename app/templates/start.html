@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #095394, #00f2fe);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+        }
+        .start-container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 10px;
+        }
+        .start-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            margin-top: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div class="start-container">
+        <img src="{{ url_for('static', filename='images/start_image.png') }}" alt="Start Image" class="start-image">
+        {% block start_content %}{% endblock %}
+    </div>
+</body>
+</html>

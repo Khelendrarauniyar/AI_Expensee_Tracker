@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to right, #2c3e50, #4ca1af);
+        color: white;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 750px;
+        margin: 30px auto;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        color: #ffcc00;
+    }
+
+    .expense-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        transition: 0.3s ease;
+        position: relative;
+    }
+
+    .expense-item:hover {
+        transform: scale(1.02);
+    }
+
+    .expense-item label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #ffd700;
+    }
+
+    .expense-item input,
+    .expense-item textarea {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        outline: none;
+        transition: all 0.3s ease-in-out;
+        display: block;
+    }
+
+    .expense-item input:focus,
+    .expense-item textarea:focus {
+        border-color: #ffcc00;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .btn-save,
+    .btn-delete {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        text-transform: uppercase;
+    }
+
+    .btn-save {
+        background: linear-gradient(45deg, #28a745, #60c37b);
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(45deg, #218838, #4fa463);
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: linear-gradient(45deg, #dc3545, #ff6b6b);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(45deg, #c82333, #e04747);
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container">
+    <h2>Edit Expenses - {{ category.name }}</h2>
+    <form method="POST" action="{{ url_for('main.edit_expenses', category_id=category.id) }}">
+        {% for expense in expenses %}
+        <div class="expense-item">
+            <label for="title-{{ expense.id }}">Title:</label>
+            <input type="text" id="title-{{ expense.id }}" name="title-{{ expense.id }}" value="{{ expense.title }}" required>
+        
+            <label for="amount-{{ expense.id }}">Amount:</label>
+            <input type="number" id="amount-{{ expense.id }}" name="amount-{{ expense.id }}" step="0.01" value="{{ expense.amount }}" required>
+        
+            <label for="notes-{{ expense.id }}">Notes:</label>
+            <textarea id="notes-{{ expense.id }}" name="notes-{{ expense.id }}">{{ expense.notes }}</textarea>
+        
+            <label for="date-{{ expense.id }}">Date:</label>
+            <input type="date" id="date-{{ expense.id }}" name="date-{{ expense.id }}" value="{{ expense.date.strftime('%Y-%m-%d') }}" required>
+        
+            <label for="time-{{ expense.id }}">Time:</label>
+            <input type="time" id="time-{{ expense.id }}" name="time-{{ expense.id }}" value="{{ expense.date.strftime('%H:%M') }}" required>
+        
+            <div class="btn-group">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <button type="button" class="btn-delete delete-expense" data-id="{{ expense.id }}">Delete</button>
+            </div>
+        </div>
+        {% endfor %}
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll(".delete-expense").forEach(button => {
+        button.addEventListener("click", function() {
+            const expenseId = this.getAttribute("data-id");
+            const expenseItem = this.closest(".expense-item");
+            
+            fetch(`/delete_expense/${expenseId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ "category_id": "{{ category.id }}" })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    expenseItem.remove();
+                    alert("Expense deleted successfully!");
+                } else {
+                    alert("Error deleting expense!");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+</script>
+{% endblock %}
