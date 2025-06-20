@@ -505,7 +505,7 @@ def help():
 import google.generativeai as genai
 
 # Configure Gemini AI
-genai.configure(api_key='AIzaSyCvK_lBNtpi3FGCGbcjbc-OcXviqNMB31w')
+genai.configure(api_key='Your API')
 
 @main.route('/maya', methods=['POST'])
 @login_required
